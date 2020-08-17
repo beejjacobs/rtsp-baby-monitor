@@ -16,6 +16,7 @@ import {pipelines} from 'media-stream-library';
 /** * @type {HTMLVideoElement|null} */
 let el = null;
 let pipeline = null;
+const CHECK_TIME = 60 * 1000;
 
 export default {
   name: 'VideoWrapper',
@@ -26,7 +27,8 @@ export default {
         rtsp: {uri: `rtsp://192.168.0.6:554/s0`},
       },
       muted: false,
-      playing: false
+      playing: false,
+      checkId: 0
     };
   },
   async mounted() {
@@ -43,21 +45,33 @@ export default {
     el.addEventListener('volumechange', () => {
       this.muted = el.muted;
     });
+    this.checkId = setInterval(() => this.check(), CHECK_TIME);
     window.v1 = el;
     await this.play();
   },
   methods: {
+    check() {
+      if (!this.playing) {
+        console.log('check:play');
+        this.play();
+      }
+    },
     async mute() {
       el.muted = !el.muted;
     },
     async playPause() {
       if (this.playing) {
+        clearInterval(this.checkId);
         el.pause();
       } else {
+        this.checkId = setInterval(() => this.check(), CHECK_TIME);
         await this.play();
       }
     },
     async play() {
+      if (pipeline) {
+        pipeline.close();
+      }
       pipeline = new pipelines.Html5VideoPipeline({
         ...this.config,
         mediaElement: el
