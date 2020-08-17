@@ -1,0 +1,16 @@
+{
+  "manifest_version": 2,
+  "name": "Baby Monitor",
+  "version": "1.0.0",
+  "default_locale": "en",
+  "description": "Simple baby monitor",
+  "display": "standalone",
+  "background_color": "#3F51B5",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    }
+  ]
+}
