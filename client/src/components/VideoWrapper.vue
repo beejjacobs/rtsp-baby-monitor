@@ -2,8 +2,10 @@
   <div>
     <video id="video" autoplay muted/>
     <v-btn @click="playPause" fab fixed bottom left color="primary">
-      <v-icon v-if="playing">mdi-pause</v-icon>
-      <v-icon v-else>mdi-play</v-icon>
+      <v-icon>mdi-{{ playing ? 'pause' : 'play' }}</v-icon>
+    </v-btn>
+    <v-btn @click="mute" fab fixed bottom right :color="muted ? 'red' : 'blue'">
+      <v-icon>mdi-volume-{{ muted ? 'off' : 'high' }}</v-icon>
     </v-btn>
   </div>
 </template>
@@ -23,10 +25,14 @@ export default {
         ws: {uri: `ws://192.168.0.2:8854/`},
         rtsp: {uri: `rtsp://192.168.0.6:554/s0`},
       },
+      muted: false,
       playing: false
     };
   },
   async mounted() {
+    if (el) {
+      return;
+    }
     el = document.getElementById('video');
     el.addEventListener('play', () => {
       this.playing = true;
@@ -34,34 +40,31 @@ export default {
     el.addEventListener('pause', () => {
       this.playing = false;
     });
-    window.v1 = el;
-    pipeline = new pipelines.Html5VideoPipeline({
-      ...this.config,
-      mediaElement: el
+    el.addEventListener('volumechange', () => {
+      this.muted = el.muted;
     });
+    window.v1 = el;
     await this.play();
   },
   methods: {
-    async play() {
-      console.log('play');
-      await pipeline.ready;
-      console.log('playing');
-      pipeline.rtsp.play();
-      el.play();
+    async mute() {
+      el.muted = !el.muted;
     },
     async playPause() {
       if (this.playing) {
         el.pause();
       } else {
-        await this.recreate();
+        await this.play();
       }
     },
-    async recreate() {
+    async play() {
       pipeline = new pipelines.Html5VideoPipeline({
         ...this.config,
         mediaElement: el
       });
-      await this.play();
+      await pipeline.ready;
+      pipeline.rtsp.play();
+      el.play();
     }
   }
 }
