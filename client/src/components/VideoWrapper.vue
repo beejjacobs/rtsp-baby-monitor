@@ -1,10 +1,10 @@
 <template>
   <div>
     <video id="video" autoplay muted/>
-    <v-btn @click="playPause" fab fixed bottom left color="primary">
+    <v-btn @click="playPause" small fab fixed bottom left color="primary">
       <v-icon>mdi-{{ playing ? 'pause' : 'play' }}</v-icon>
     </v-btn>
-    <v-btn @click="mute" fab fixed bottom right :color="muted ? 'red' : 'blue'">
+    <v-btn @click="mute" small fab fixed bottom right :color="muted ? 'red' : 'blue'">
       <v-icon>mdi-volume-{{ muted ? 'off' : 'high' }}</v-icon>
     </v-btn>
   </div>
@@ -40,6 +40,9 @@ export default {
       this.playing = true;
     });
     el.addEventListener('pause', () => {
+      this.playing = false;
+    });
+    el.addEventListener('ended', () => {
       this.playing = false;
     });
     el.addEventListener('volumechange', () => {
@@ -78,7 +81,11 @@ export default {
       });
       await pipeline.ready;
       pipeline.rtsp.play();
-      el.play();
+      try {
+        el.play();
+      } catch(e) {
+        console.error('play error', e);
+      }
     }
   }
 }
