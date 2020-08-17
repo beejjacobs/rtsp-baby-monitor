@@ -88,5 +88,7 @@ export default {
   video {
     max-width: 100vw;
     max-height: 100vh;
+    margin: 0 auto;
+    display: block;
   }
 </style>
